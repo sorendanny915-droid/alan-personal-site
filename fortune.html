@@ -6,7 +6,7 @@
 <title>赛博求签 · Alan的魔术箱</title>
 <meta name="description" content="在晴日山间道观摇一支签，查看今日原创签文与解签。">
 <link rel="preload" href="assets/temple-sunrise.jpg" as="image">
-<link rel="stylesheet" href="fortune.css">
+<link rel="stylesheet" href="fortune.css?v=2">
 </head>
 <body>
 <header class="site-header">
@@ -22,7 +22,7 @@
   </section>
   <div class="layout">
     <section class="draw" aria-labelledby="draw-title">
-      <div class="stage" aria-hidden="true">
+      <div class="stage" id="stage" aria-hidden="true">
         <div class="tube" id="tube">
           <span class="stick" style="--x:16%;--angle:-17deg;--rise:9px"></span>
           <span class="stick" style="--x:32%;--angle:-9deg;--rise:19px"></span>
@@ -30,6 +30,13 @@
           <span class="stick" style="--x:65%;--angle:12deg;--rise:18px"></span>
           <span class="stick" style="--x:78%;--angle:19deg;--rise:8px"></span>
           <span class="vessel"><span>签</span></span>
+        </div>
+        <div class="sparkles">
+          <span style="--x:-36px;--y:-22px"></span>
+          <span style="--x:-22px;--y:-46px"></span>
+          <span style="--x:5px;--y:-57px"></span>
+          <span style="--x:29px;--y:-37px"></span>
+          <span style="--x:39px;--y:-13px"></span>
         </div>
       </div>
       <div>
@@ -68,13 +75,17 @@ const F=[
 {lv:"下",p:["风急浪头高","今日莫远行","收帆回港湾","明朝再扬鞭"],s:{事业:"今天别硬撑，先把能做的做完。",财运:"别做大决定。",感情:"先睡一觉再说。",出行:"尽量留在原地。"}}
 ];
 const tube = document.getElementById('tube');
+const stage = document.getElementById('stage');
 const go = document.getElementById('go');
 const hint = document.getElementById('hint');
 const dateLabel = document.getElementById('date');
 const resultTitle = document.getElementById('result-title');
+const placeholder = document.getElementById('placeholder');
+const result = document.getElementById('result');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+// Reset the old played marker once so visitors can try the new animation.
+const playedMarker = '2';
 let currentDate;
-let drawn;
 
 function todayKey(date) {
   return [date.getFullYear(), date.getMonth() + 1, date.getDate()].join('-');
@@ -88,7 +99,7 @@ function fortuneIndex(key) {
   return hash % F.length;
 }
 
-function reveal() {
+function reveal(animate = false) {
   const index = fortuneIndex(currentDate);
   const fortune = F[index];
   document.getElementById('no').textContent = `第 ${index + 1} 签`;
@@ -104,11 +115,12 @@ function reveal() {
     return item;
   });
   document.getElementById('say').replaceChildren(...interpretations);
-  document.getElementById('placeholder').hidden = true;
-  document.getElementById('result').hidden = false;
+  placeholder.hidden = true;
+  result.hidden = false;
+  result.classList.toggle('reveal', animate);
   tube.classList.add('drawn');
-  go.textContent = '查看今日签文';
-  hint.textContent = '今日已求签，明天可再求。';
+  go.textContent = '再摇一次';
+  hint.textContent = '重摇会再次揭晓同一支签。';
 }
 
 function refreshDate() {
@@ -119,17 +131,17 @@ function refreshDate() {
   dateLabel.dateTime = [date.getFullYear(), date.getMonth() + 1, date.getDate()]
     .map(part => String(part).padStart(2, '0')).join('-');
   dateLabel.textContent = new Intl.DateTimeFormat('zh-CN', { dateStyle: 'full' }).format(date);
-  drawn = false;
+  let drawn = false;
   try {
-    drawn = localStorage.getItem('fortune:' + key) === '1';
+    drawn = localStorage.getItem('fortune:' + key) === playedMarker;
   } catch {}
   if (drawn) {
     reveal();
     return;
   }
   tube.classList.remove('drawn');
-  document.getElementById('placeholder').hidden = false;
-  document.getElementById('result').hidden = true;
+  placeholder.hidden = false;
+  result.hidden = true;
   go.textContent = '摇签';
   hint.textContent = '心里想一件事，再摇一支签。';
 }
@@ -141,25 +153,31 @@ function focusResult() {
 
 refreshDate();
 document.addEventListener('visibilitychange', refreshDate);
-go.addEventListener('click', () => {
+go.addEventListener('click', async () => {
   refreshDate();
-  if (drawn) {
-    focusResult();
-    return;
-  }
   go.disabled = true;
   go.textContent = '摇签中…';
-  tube.classList.add('shake');
-  setTimeout(() => {
+  hint.textContent = '签筒摇动中…';
+  placeholder.hidden = false;
+  result.hidden = true;
+  result.classList.remove('reveal');
+  tube.classList.remove('drawn');
+  if (!reducedMotion.matches) {
+    tube.classList.add('shake');
+    await new Promise(resolve => setTimeout(resolve, 700));
     tube.classList.remove('shake');
-    drawn = true;
-    try {
-      localStorage.setItem('fortune:' + currentDate, '1');
-    } catch {}
-    go.disabled = false;
-    reveal();
-    focusResult();
-  }, reducedMotion.matches ? 0 : 850);
+    stage.classList.add('burst');
+    tube.classList.add('drawn');
+    hint.textContent = '竹签出筒，正在展开签文。';
+    await new Promise(resolve => setTimeout(resolve, 450));
+    stage.classList.remove('burst');
+  }
+  try {
+    localStorage.setItem('fortune:' + currentDate, playedMarker);
+  } catch {}
+  go.disabled = false;
+  reveal(!reducedMotion.matches);
+  focusResult();
 });
 </script>
 </body>

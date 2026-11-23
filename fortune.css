@@ -79,6 +79,7 @@ h2 { margin: 0; font-size: 1.6rem; }
 .draw p, .placeholder { margin: 6px 0 16px; color: var(--muted); }
 
 .stage {
+  position: relative;
   display: grid;
   height: 174px;
   place-items: end center;
@@ -87,10 +88,10 @@ h2 { margin: 0; font-size: 1.6rem; }
 }
 
 .tube { position: relative; width: 82px; height: 111px; transform-origin: center bottom; }
-.tube.shake { animation: shake .85s ease-in-out; }
+.tube.shake { animation: shake .7s ease-in-out; }
 @keyframes shake {
-  15%, 45%, 70% { transform: translateY(-9px) rotate(-12deg); }
-  30%, 60%, 85% { transform: translateY(-3px) rotate(11deg); }
+  14%, 42%, 70% { transform: translate(-6px, -12px) rotate(-17deg); }
+  28%, 56%, 84% { transform: translate(6px, -4px) rotate(16deg); }
 }
 
 .stick {
@@ -107,7 +108,42 @@ h2 { margin: 0; font-size: 1.6rem; }
   transition: transform .3s ease-out;
 }
 
-.tube.drawn .drawn-stick { transform: translateY(-56px) rotate(9deg); }
+.tube.shake .stick { animation: rattle .14s ease-in-out 5 alternate; }
+@keyframes rattle {
+  to { transform: translateY(calc(-1 * var(--rise) - 8px)) rotate(calc(var(--angle) + 7deg)); }
+}
+
+.tube.drawn .drawn-stick { transform: translateY(-58px) rotate(9deg); }
+.stage.burst .drawn-stick { animation: emerge .45s ease-out; }
+@keyframes emerge {
+  from { transform: translateY(-29px) rotate(1deg); }
+  55% { transform: translateY(-68px) rotate(14deg); }
+  to { transform: translateY(-58px) rotate(9deg); }
+}
+
+.sparkles {
+  position: absolute;
+  left: 50%;
+  bottom: 118px;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.sparkles span {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  opacity: 0;
+  background: #cb871c;
+  clip-path: polygon(50% 0, 64% 36%, 100% 50%, 64% 64%, 50% 100%, 36% 64%, 0 50%, 36% 36%);
+}
+
+.stage.burst .sparkles span { animation: sparkle .45s ease-out; }
+@keyframes sparkle {
+  20% { opacity: 1; }
+  to { transform: translate(var(--x), var(--y)) rotate(30deg); opacity: 0; }
+}
 
 .vessel {
   position: absolute;
@@ -148,6 +184,11 @@ h2 { margin: 0; font-size: 1.6rem; }
 .go:hover { background: #82291f; }
 .go:disabled { opacity: .7; cursor: progress; }
 .paper { background: linear-gradient(145deg, #fffdf6, #fff6e6); }
+#result.reveal { animation: reveal-paper .4s ease-out both; }
+@keyframes reveal-paper {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 .result-heading { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
 .result-heading p { margin: 0; }
 #no { color: #6f5841; font-size: .875rem; }
@@ -171,10 +212,12 @@ footer { padding: 26px 5vw; text-align: center; color: var(--muted); font-size: 
   h1 { margin-bottom: 2px; }
   .layout { grid-template-columns: 1fr; gap: 14px; margin-top: -16px; }
   .draw, .paper { min-height: 0; }
-  .stage { height: 145px; padding: 0; }
+  .stage { height: 156px; padding: 0; }
+  .sparkles { bottom: 108px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tube.shake { animation: none; }
+  .tube.shake, .tube.shake .stick, .stage.burst .drawn-stick,
+  .stage.burst .sparkles span, #result.reveal { animation: none; }
   .stick { transition: none; }
 }
