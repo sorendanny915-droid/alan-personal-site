@@ -24,6 +24,7 @@ const summary = document.getElementById('summary');
 const zoomTip = document.getElementById('zoom-tip');
 const preview = document.getElementById('preview');
 const previewArt = document.getElementById('preview-art');
+const previewLoading = document.getElementById('preview-loading');
 const previewOrientation = document.getElementById('preview-orientation');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let mode = 'spread';
@@ -219,7 +220,24 @@ const library = document.getElementById('library');
 const libraryGrid = document.getElementById('library-grid');
 
 function openPreview(card, reversed = null) {
-  previewArt.src = artPath(card);
+  const source = new URL(artPath(card), document.baseURI).href;
+  if (previewArt.src !== source || previewArt.hidden) {
+    previewArt.hidden = true;
+    previewLoading.hidden = false;
+    previewLoading.textContent = '正在加载大图…';
+    if (previewArt.src !== source || (previewArt.complete && !previewArt.naturalWidth)) {
+      previewArt.src = source;
+    }
+    previewArt.decode().then(() => {
+      if (previewArt.src !== source) return;
+      previewLoading.hidden = true;
+      previewArt.hidden = false;
+    }).catch(() => {
+      if (previewArt.src === source && previewArt.hidden) {
+        previewLoading.textContent = '牌面加载失败，请关闭后重试。';
+      }
+    });
+  }
   previewArt.alt = card.zh + '牌面';
   previewArt.classList.toggle('upside-down', reversed === true);
   previewOrientation.hidden = reversed === null;

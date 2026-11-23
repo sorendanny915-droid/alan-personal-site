@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#201910" />
     <meta name="description" content="蒸汽朋克塔罗，占卜三张牌的根源、当下与指引，也可单牌快速占卜。" />
     <title>星轨塔罗 · Arcana Tarot</title>
-    <link rel="stylesheet" href="./src/styles.css?v=3" />
+    <link rel="stylesheet" href="./src/styles.css?v=4" />
   </head>
   <body>
     <header class="topbar">
@@ -64,10 +64,13 @@
     <footer>牌面解读仅供娱乐与自我反思。</footer>
     <dialog class="preview" id="preview" aria-labelledby="preview-title">
       <form method="dialog"><button class="secondary" type="submit" aria-label="关闭牌面预览" autofocus>×</button></form>
-      <img id="preview-art" width="640" height="960" alt="">
+      <div class="preview-media">
+        <p id="preview-loading" role="status" hidden></p>
+        <img id="preview-art" width="640" height="960" alt="" hidden>
+      </div>
       <div class="result-heading"><h2 id="preview-title"></h2><span class="orientation" id="preview-orientation" hidden></span></div>
       <p id="preview-essence"></p>
     </dialog>
-    <script type="module" src="./src/reading.js?v=3"></script>
+    <script type="module" src="./src/reading.js?v=4"></script>
   </body>
 </html>
