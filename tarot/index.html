@@ -3,14 +3,70 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0c1230" />
-    <meta name="description" content="星轨塔罗 · Arcana Tarot — 在星尘与牌面之间，聆听此刻的内心。" />
+    <meta name="theme-color" content="#201910" />
+    <meta name="description" content="蒸汽朋克塔罗，占卜三张牌的根源、当下与指引，也可单牌快速占卜。" />
     <title>星轨塔罗 · Arcana Tarot</title>
-    <link rel="stylesheet" href="./src/styles.css" />
+    <link rel="stylesheet" href="./src/styles.css?v=2" />
   </head>
   <body>
-    <div id="app"><p class="initial-loading" role="status">正在加载星轨塔罗… <a href="../">返回 Alan的魔术箱</a></p></div>
-    <noscript><p class="initial-loading">请启用 JavaScript 后抽牌。</p></noscript>
-    <script type="module" src="./src/main.js"></script>
+    <header class="topbar">
+      <a href="../">← Alan的魔术箱</a>
+      <a href="#library" id="library-link">大阿卡纳牌库 ↓</a>
+    </header>
+    <main class="page">
+      <section class="hero" aria-labelledby="page-title">
+        <div class="hero-copy">
+          <p class="eyebrow">STEAMPUNK ARCANA</p>
+          <h1 id="page-title">星轨塔罗</h1>
+          <p>从二十二张大阿卡纳中抽牌，梳理问题的来处、当下和下一步。</p>
+        </div>
+        <div class="hero-deck" aria-hidden="true">
+          <img src="./cards/10.jpg" width="640" height="960" alt="">
+          <img src="./cards/17.jpg" width="640" height="960" alt="">
+          <img src="./cards/01.jpg" width="640" height="960" alt="">
+        </div>
+      </section>
+      <section class="reading panel" aria-labelledby="reading-title">
+        <div class="reading-heading">
+          <div>
+            <h2 id="reading-title">选择牌阵</h2>
+            <p id="mode-description">根源 · 当下 · 指引</p>
+          </div>
+          <fieldset class="mode-picker" id="mode-picker">
+            <legend class="sr-only">占卜模式</legend>
+            <label><input type="radio" name="reading-mode" value="spread" checked><span>三张牌阵</span></label>
+            <label><input type="radio" name="reading-mode" value="single"><span>单牌快速占卜</span></label>
+          </fieldset>
+        </div>
+        <div class="table" id="table" data-mode="spread">
+          <div class="spread" id="spread"></div>
+        </div>
+        <div class="reading-controls">
+          <p id="reading-status" role="status">先在心里想一个问题，然后洗牌。</p>
+          <div class="actions">
+            <button class="secondary" type="button" id="shuffle" disabled>⟳ 洗牌</button>
+            <button class="primary" type="button" id="draw" disabled>抽一张</button>
+          </div>
+        </div>
+        <noscript><p>请启用 JavaScript 后开始抽牌。</p></noscript>
+      </section>
+      <section class="interpretations" id="interpretations" aria-labelledby="interpretation-title" hidden>
+        <h2 id="interpretation-title" tabindex="-1">牌阵解读</h2>
+        <div class="interpretation-grid" id="individual"></div>
+        <section class="summary panel" id="summary" aria-labelledby="summary-title" hidden></section>
+      </section>
+      <details class="library panel" id="library">
+        <summary>大阿卡纳牌库 <span>22 张牌</span></summary>
+        <div class="library-grid" id="library-grid"></div>
+      </details>
+    </main>
+    <footer>牌面解读仅供娱乐与自我反思。</footer>
+    <dialog class="preview" id="preview" aria-labelledby="preview-title">
+      <form method="dialog"><button class="secondary" type="submit" aria-label="关闭牌面预览" autofocus>×</button></form>
+      <img id="preview-art" width="640" height="960" alt="">
+      <h2 id="preview-title"></h2>
+      <p id="preview-essence"></p>
+    </dialog>
+    <script type="module" src="./src/reading.js"></script>
   </body>
 </html>
