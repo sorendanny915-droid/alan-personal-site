@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>赛博求签 · Alan的魔术箱</title>
+<style>
+:root{--bg:#0d1218;--ink:#e8e2d0;--mute:#8d99a3;--jade:#6cc3b0;--gold:#d9b26a;--red:#c4553f;
+ color-scheme:dark;font:16px/1.75 "PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 28%,#1a2a33 0,var(--bg) 62%);color:var(--ink);
+ padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);text-align:center}
+a{color:var(--jade);text-decoration:none}a:focus-visible,button:focus-visible{outline:2px solid var(--jade);outline-offset:3px}
+.top{display:flex;justify-content:space-between;width:min(92vw,560px);margin:0 auto;padding:18px 0;font-size:14px}
+.top span{color:var(--mute)}
+h1{margin:12px 0 2px;font-size:28px;letter-spacing:.3em;font-weight:600}
+.date{color:var(--mute);font-size:14px;margin:0}
+.stage{height:290px;perspective:700px;display:flex;align-items:center;justify-content:center;margin-top:8px}
+.tube{position:relative;width:96px;height:200px;transform-style:preserve-3d;transform:rotateX(-12deg) rotateY(0);animation:spin 14s linear infinite}
+.tube.shake{animation:shake .9s ease-in-out}
+@keyframes spin{to{transform:rotateX(-12deg) rotateY(360deg)}}
+@keyframes shake{0%,100%{transform:rotateX(-12deg) rotateZ(0)}15%{transform:rotateX(-12deg) rotateZ(-14deg) translateY(-8px)}
+ 30%{transform:rotateX(-12deg) rotateZ(12deg)}45%{transform:rotateX(-12deg) rotateZ(-11deg) translateY(-8px)}60%{transform:rotateX(-12deg) rotateZ(9deg)}80%{transform:rotateX(-12deg) rotateZ(-4deg)}}
+.stick{position:absolute;left:50%;top:6px;width:11px;height:178px;margin-left:-5px;border-radius:3px;
+ background:linear-gradient(90deg,#8a6a3c,#d9b26a 45%,#8a6a3c);transform-style:preserve-3d;transition:transform .8s cubic-bezier(.3,1.4,.5,1)}
+.stick::before{content:"";position:absolute;left:0;top:0;width:100%;height:30px;background:var(--red);border-radius:3px 3px 0 0}
+.wall{position:absolute;left:0;bottom:0;width:96px;height:126px;transform-style:preserve-3d}
+.face{position:absolute;bottom:0;width:60px;height:126px;left:18px;background:linear-gradient(90deg,#17222b,#2d4350 50%,#17222b);border:1px solid #3a5565}
+.cap{position:absolute;left:-2px;bottom:-6px;width:100px;height:14px;border-radius:50%;background:#3a5565;transform:rotateX(90deg) translateZ(0)}
+.stick.out{transform:var(--t) translateY(-96px)}
+button.go{font:inherit;font-size:18px;letter-spacing:.3em;padding:12px 34px;margin-top:6px;color:#0d1218;background:var(--gold);border:0;border-radius:999px;cursor:pointer}
+button.go:disabled{opacity:.5;cursor:default}
+.card{width:min(88vw,380px);margin:26px auto 40px;padding:26px 24px 22px;background:#f0e8d2;color:#2a2418;border-radius:6px;
+ box-shadow:0 14px 40px rgba(0,0,0,.45);transform-origin:50% 0;animation:drop .7s ease-out}
+@keyframes drop{from{opacity:0;transform:translateY(-30px) rotateX(70deg)}}
+.card[hidden]{display:none}
+.card .no{font-size:14px;color:#7c6a49;margin:0}
+.card .lv{font-size:34px;font-weight:700;color:var(--red);margin:2px 0 10px;letter-spacing:.2em}
+.card .poem{font-size:19px;line-height:2;margin:0 0 14px;letter-spacing:.12em}
+.card hr{border:0;border-top:1px solid #c9bb98;margin:12px 0}
+.card dl{margin:0;text-align:left;font-size:14.5px;line-height:1.8}
+.card dt{display:inline;font-weight:700}.card dd{display:inline;margin:0}.card dd::after{content:"";display:block}
+.note{color:var(--mute);font-size:13px;padding-bottom:36px}
+@media (prefers-reduced-motion:reduce){.tube{animation:none}.card{animation:none}}
+</style>
+</head>
+<body>
+<div class="top"><a href="index.html">← Alan的魔术箱</a><span>每天一支，仅供娱乐</span></div>
+<h1>赛博求签</h1>
+<p class="date" id="date"></p>
+
+<div class="stage" aria-hidden="true"><div class="tube" id="tube"></div></div>
+<button class="go" id="go" type="button">摇签</button>
+<p class="note" id="hint">心里想一件事，再点摇签。</p>
+
+<section class="card" id="card" hidden aria-live="polite">
+  <p class="no" id="no"></p><p class="lv" id="lv"></p>
+  <p class="poem" id="poem"></p><hr>
+  <dl id="say"></dl>
+</section>
+<p class="note">签文为原创，运势仅供娱乐，别当真。</p>
+
+<script>
+const F=[
+{lv:"上上",p:["潮平两岸阔","风正一帆悬","旧账今朝了","新程自向前"],s:{事业:"拖着的事能落地，放手推一把。",财运:"有小额进账，别急着再投出去。",感情:"主动说一句实话，比猜来猜去管用。",出行:"顺风，宜早不宜晚。"}},
+{lv:"上",p:["灯下改旧稿","字字有回声","莫嫌慢半步","慢处见真功"],s:{事业:"适合打磨已有的东西，不宜另起炉灶。",财运:"稳，开销留一点余量。",感情:"耐心听对方说完。",出行:"近处走走就好。"}},
+{lv:"上",p:["云散月自明","何须问东西","守得三更静","天亮鸟先啼"],s:{事业:"别被杂音带跑，按原计划走。",财运:"不动即是赚。",感情:"保持距离反而更舒服。",出行:"天气好，适合散心。"}},
+{lv:"中上",p:["小舟过浅滩","擦底不翻船","看清水深处","再行莫贪欢"],s:{事业:"有点磕碰，但能过，别硬冲。",财运:"小心冲动消费。",感情:"别在气头上回消息。",出行:"留够时间，避开高峰。"}},
+{lv:"中",p:["雾里看灯塔","忽远又忽近","不必急着靠","等雾散再行"],s:{事业:"信息不全，先别下结论。",财运:"持平，暂不做大决定。",感情:"顺其自然。",出行:"可去可不去。"}},
+{lv:"中",p:["一线牵风筝","松紧要自知","太紧线易断","太松随风移"],s:{事业:"掌握节奏，别催别人也别催自己。",财运:"按预算来。",感情:"给彼此一点空间。",出行:"适合短途。"}},
+{lv:"中上",p:["旧锚今可起","新港在前头","莫恋熟水域","一步便是秋"],s:{事业:"换个做法，可能比死磕有效。",财运:"开新源比省开支更有用。",感情:"该翻篇的翻篇。",出行:"可以尝试没去过的地方。"}},
+{lv:"上上",p:["满帆迎朝阳","一路皆顺风","所求皆有应","莫忘谢同行"],s:{事业:"贵人在身边，记得道声谢。",财运:"有意外之喜。",感情:"心意相通的一天。",出行:"万事顺利。"}},
+{lv:"中下",p:["暗礁藏浪下","无声最难防","慢行多看图","稳过便无妨"],s:{事业:"细节容易出错，交付前多检查一遍。",财运:"当心小额漏财。",感情:"言语留余地。",出行:"出发前再确认一次。"}},
+{lv:"中",p:["夜航不见岸","舵稳心自宁","星在云后面","明日必晴明"],s:{事业:"过渡期，坚持就好。",财运:"平稳。",感情:"安静陪伴胜过多言。",出行:"夜里少赶路。"}},
+{lv:"上",p:["炉边煮清茶","一盏解千愁","事缓则圆日","人和万事周"],s:{事业:"多沟通，少单打独斗。",财运:"人情往来有进账。",感情:"一顿好饭胜过千言。",出行:"约上朋友一起。"}},
+{lv:"下",p:["风急浪头高","今日莫远行","收帆回港湾","明朝再扬鞭"],s:{事业:"今天别硬撑，先把能做的做完。",财运:"别做大决定。",感情:"先睡一觉再说。",出行:"尽量留在原地。"}}
+];
+const tube=document.getElementById('tube');
+let h='';for(let i=0;i<9;i++){h+='<div class="stick" style="transform:rotateY('+i*40+'deg) translateZ(30px)"></div>'}
+tube.innerHTML=h+'<div class="wall"><div class="face" style="transform:rotateY(0) translateZ(0)"></div></div>';
+const d=new Date(),key=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+document.getElementById('date').textContent=d.getFullYear()+' 年 '+(d.getMonth()+1)+' 月 '+d.getDate()+' 日';
+function idx(k){let x=2166136261;for(const c of k){x^=c.charCodeAt(0);x=Math.imul(x,16777619)>>>0}return x%F.length}
+function show(){
+  const i=idx(key),f=F[i];
+  document.getElementById('no').textContent='第 '+(i+1)+' 签';
+  document.getElementById('lv').textContent=f.lv;
+  document.getElementById('poem').innerHTML=f.p.join('<br>');
+  document.getElementById('say').innerHTML=Object.keys(f.s).map(k=>'<dt>'+k+'：</dt><dd>'+f.s[k]+'</dd>').join('');
+  document.getElementById('card').hidden=false;
+}
+const go=document.getElementById('go'),hint=document.getElementById('hint');
+let drawn=false;try{drawn=localStorage.getItem('fortune:'+key)==='1'}catch(e){}
+if(drawn){show();go.textContent='再看一次';hint.textContent='今日已求，明天再来。'}
+go.addEventListener('click',()=>{
+  go.disabled=true;tube.classList.add('shake');
+  setTimeout(()=>{
+    tube.classList.remove('shake');
+    const s=tube.querySelectorAll('.stick')[idx(key)%9];s.style.setProperty('--t',s.style.transform);s.classList.add('out');
+    setTimeout(()=>{show();go.disabled=false;go.textContent='再看一次';hint.textContent='今日已求，明天再来。';
+      try{localStorage.setItem('fortune:'+key,'1')}catch(e){}},700);
+  },900);
+});
+</script>
+</body>
+</html>
