@@ -12,11 +12,88 @@ body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)
 .bar a{color:#6cc3b0;text-decoration:none}
 .bar a:focus-visible{outline:2px solid #6cc3b0;outline-offset:3px}
 .bar span{color:#8fa3ab}
-iframe{flex:1;width:100%;border:0;background:#171815}
+.game-view { position: relative; flex: 1; min-height: 0; background: #171815; }
+iframe { display: block; width: 100%; height: 100%; border: 0; }
+.startup {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding: 24px;
+  overflow: auto;
+  text-align: center;
+  background: #171815;
+}
+.startup[hidden], .startup-actions[hidden] { display: none; }
+.startup h1 { margin: 0 0 8px; font-size: clamp(22px, 5vw, 30px); }
+.startup p { margin: 0; color: #c1c2ae; line-height: 1.6; }
+.startup progress { width: min(240px, 90%); margin-top: 16px; accent-color: #ddc082; }
+.startup-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.startup-actions a, .startup-actions button {
+  padding: 9px 15px;
+  border: 1px solid #777962;
+  border-radius: 5px;
+  background: #292e26;
+  color: #efe8d2;
+  font: inherit;
+  cursor: pointer;
+}
 </style>
 </head>
 <body>
 <div class="bar"><a href="index.html">← 返回首页</a><span>重装机兵 回归 v8</span></div>
-<iframe src="games/mmr.html" title="重装机兵 回归 v8" allow="fullscreen; gamepad; autoplay" allowfullscreen></iframe>
+<main class="game-view">
+  <iframe id="game-frame" title="重装机兵 回归 v8" allow="fullscreen; gamepad; autoplay" allowfullscreen inert></iframe>
+  <section class="startup" id="startup" aria-labelledby="startup-title">
+    <h1 id="startup-title">重装机兵 回归 v8</h1>
+    <p id="startup-status" role="status">正在加载游戏，首次打开约需下载 5.7 MB。</p>
+    <progress id="startup-progress" aria-label="游戏加载中"></progress>
+    <div class="startup-actions" id="startup-actions" hidden>
+      <button id="startup-retry" type="button">重新加载</button>
+      <a href="games/mmr.html?startup=2">直接打开游戏</a>
+    </div>
+    <noscript><p>运行游戏需要启用 JavaScript。</p></noscript>
+  </section>
+</main>
+<script>
+const gameFrame = document.getElementById('game-frame');
+const startup = document.getElementById('startup');
+const startupStatus = document.getElementById('startup-status');
+const startupProgress = document.getElementById('startup-progress');
+const startupActions = document.getElementById('startup-actions');
+let startupTimer;
+
+function loadGame() {
+  clearTimeout(startupTimer);
+  startup.hidden = false;
+  gameFrame.inert = true;
+  startupProgress.hidden = false;
+  startupActions.hidden = true;
+  startupStatus.textContent = '正在加载游戏，首次打开约需下载 5.7 MB。';
+  startupTimer = setTimeout(() => {
+    startupStatus.textContent = '加载时间较长，可以继续等待或重新加载。';
+    startupActions.hidden = false;
+  }, 12000);
+  gameFrame.src = 'games/mmr.html?startup=2';
+}
+
+gameFrame.addEventListener('load', () => {
+  const gameDocument = gameFrame.contentDocument;
+  if (gameDocument?.URL === 'about:blank') return;
+  clearTimeout(startupTimer);
+  if (gameDocument?.body?.dataset.mmrReady === 'true') {
+    gameFrame.inert = false;
+    startup.hidden = true;
+    return;
+  }
+  startupProgress.hidden = true;
+  startupActions.hidden = false;
+  startupStatus.textContent = '游戏未能初始化，请重新加载或直接打开游戏。';
+});
+
+document.getElementById('startup-retry').addEventListener('click', loadGame);
+loadGame();
+</script>
 </body>
 </html>
