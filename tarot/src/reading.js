@@ -21,6 +21,10 @@ const interpretations = document.getElementById('interpretations');
 const interpretationTitle = document.getElementById('interpretation-title');
 const individual = document.getElementById('individual');
 const summary = document.getElementById('summary');
+const zoomTip = document.getElementById('zoom-tip');
+const preview = document.getElementById('preview');
+const previewArt = document.getElementById('preview-art');
+const previewOrientation = document.getElementById('preview-orientation');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let mode = 'spread';
 let deck = [];
@@ -64,7 +68,9 @@ function updateControls() {
     ? '翻牌完成'
     : mode === 'single' ? '抽一张' : `抽第 ${drawn.length + 1} 张`;
   spread.querySelectorAll('.card-button').forEach((button, index) => {
-    button.disabled = !canDraw || index !== drawn.length;
+    const canReveal = canDraw && index === drawn.length;
+    const canPreview = !busy && index < drawn.length;
+    button.disabled = !(canReveal || canPreview);
   });
 }
 
@@ -78,6 +84,7 @@ function resetReading() {
   interpretationTitle.textContent = mode === 'spread' ? '牌阵解读' : '单牌解读';
   interpretations.hidden = true;
   summary.hidden = true;
+  zoomTip.hidden = true;
   individual.replaceChildren();
   status.textContent = '先在心里想一个问题，然后洗牌。';
   renderSlots();
@@ -169,7 +176,9 @@ async function draw() {
 
   drawn.push(entry);
   spread.querySelector(`[data-caption="${index}"]`).textContent = `${card.zh} · ${orientation(entry)}`;
-  button.setAttribute('aria-label', `${position.name}，${card.zh}，${orientation(entry)}`);
+  button.setAttribute('aria-label', `放大查看${position.name}牌，${card.zh}，${orientation(entry)}`);
+  button.setAttribute('aria-haspopup', 'dialog');
+  zoomTip.hidden = false;
   appendInterpretation(entry, position);
 
   busy = false;
@@ -196,18 +205,44 @@ shuffleButton.addEventListener('click', shuffle);
 drawButton.addEventListener('click', draw);
 spread.addEventListener('click', event => {
   const button = event.target.closest('.card-button');
-  if (button && !button.disabled) draw();
+  if (!button || button.disabled) return;
+  const entry = drawn[Number(button.dataset.slot)];
+  if (entry) {
+    openPreview(entry.card, entry.reversed);
+  } else {
+    draw();
+  }
 });
 resetReading();
 
 const library = document.getElementById('library');
 const libraryGrid = document.getElementById('library-grid');
-const preview = document.getElementById('preview');
+
+function openPreview(card, reversed = null) {
+  previewArt.src = artPath(card);
+  previewArt.alt = card.zh + '牌面';
+  previewArt.classList.toggle('upside-down', reversed === true);
+  previewOrientation.hidden = reversed === null;
+  previewOrientation.textContent = reversed === null ? '' : orientation({ reversed });
+  previewOrientation.classList.toggle('reversed', reversed === true);
+  document.getElementById('preview-title').textContent = card.zh;
+  document.getElementById('preview-essence').textContent = card.essence;
+  preview.showModal();
+}
+
+preview.addEventListener('click', event => {
+  if (event.target !== preview) return;
+  const bounds = preview.getBoundingClientRect();
+  if (event.clientX < bounds.left || event.clientX > bounds.right ||
+      event.clientY < bounds.top || event.clientY > bounds.bottom) {
+    preview.close();
+  }
+});
 document.getElementById('library-link').addEventListener('click', () => { library.open = true; });
 library.addEventListener('toggle', () => {
   if (!library.open || libraryGrid.childElementCount) return;
   libraryGrid.innerHTML = cards.map(card => `
-    <button class="library-card" type="button" data-card="${card.id}" aria-label="查看${card.zh}">
+    <button class="library-card" type="button" data-card="${card.id}" aria-label="放大查看${card.zh}" aria-haspopup="dialog">
       <img src="${artPath(card)}" loading="lazy" width="640" height="960" alt="">
       <span>${card.roman} · ${card.zh}</span>
     </button>
@@ -216,11 +251,5 @@ library.addEventListener('toggle', () => {
 libraryGrid.addEventListener('click', event => {
   const button = event.target.closest('.library-card');
   if (!button) return;
-  const card = cards[Number(button.dataset.card)];
-  const artwork = document.getElementById('preview-art');
-  artwork.src = artPath(card);
-  artwork.alt = card.zh + '牌面';
-  document.getElementById('preview-title').textContent = card.zh;
-  document.getElementById('preview-essence').textContent = card.essence;
-  preview.showModal();
+  openPreview(cards[Number(button.dataset.card)]);
 });

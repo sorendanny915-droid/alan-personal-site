@@ -124,6 +124,7 @@ h1, h2, h3, h4 { font-family: var(--serif); line-height: 1.25; margin: 0; }
 .slot-label { font: 700 1.28rem/1.4 var(--serif); }
 .slot-label small { display: block; margin: 3px 0 10px; color: var(--muted); font: .75rem/1.4 system-ui, sans-serif; }
 .slot-caption { min-height: 1.7em; margin-top: 8px; color: var(--gold); font-size: .85rem; }
+.zoom-tip { margin: 10px 0 0; text-align: center; color: var(--muted); font-size: .8rem; }
 .card-button {
   display: block;
   width: min(100%, 180px);
@@ -136,7 +137,9 @@ h1, h2, h3, h4 { font-family: var(--serif); line-height: 1.25; margin: 0; }
   cursor: pointer;
   perspective: 700px;
 }
-.card-button:not(:disabled):hover .card-back { outline: 2px solid #f5c778; outline-offset: 2px; }
+.card-button:not(:disabled):hover .card-back,
+.card-button.revealed:not(:disabled):hover .card-front { outline: 2px solid #f5c778; outline-offset: 2px; }
+.card-button.revealed:not(:disabled) { cursor: zoom-in; }
 .table.shuffling .card-button { animation: shuffle .44s ease-in-out; }
 .table.shuffling .slot:nth-child(even) .card-button { animation-direction: reverse; }
 @keyframes shuffle {
@@ -220,10 +223,20 @@ h1, h2, h3, h4 { font-family: var(--serif); line-height: 1.25; margin: 0; }
 .library-card { display: grid; gap: 4px; padding: 5px; border: 1px solid var(--line); border-radius: 6px; background: #1a1611; cursor: pointer; }
 .library-card img { display: block; width: 100%; height: auto; border-radius: 4px; }
 .library-card span { font-size: .8rem; }
-.preview { width: min(92vw, 408px); max-height: 91vh; padding: 14px 16px; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
-.preview::backdrop { background: #0e0906ba; }
+.preview { width: min(92vw, 520px); max-height: 92vh; padding: 14px 16px; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+.preview[open] { animation: preview-zoom .26s cubic-bezier(.2, .8, .25, 1) both; }
+.preview::backdrop { background: #0e0906ce; animation: backdrop-fade .22s ease-out both; }
+@keyframes preview-zoom {
+  from { opacity: 0; transform: translateY(14px) scale(.84); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes backdrop-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 .preview form { display: flex; justify-content: flex-end; margin-bottom: 8px; }
-.preview img { display: block; width: auto; max-width: 100%; max-height: 50vh; height: auto; margin: 0 auto 12px; border-radius: 6px; }
+.preview img { display: block; width: auto; max-width: 100%; max-height: 68vh; max-height: 68svh; height: auto; margin: 0 auto 12px; border-radius: 6px; }
+.preview img.upside-down { transform: rotate(180deg); }
 .preview h2, .preview p { margin: 5px 0; }
 footer { padding: 25px 10px; text-align: center; color: var(--muted); font-size: .82rem; }
 
@@ -241,4 +254,5 @@ footer { padding: 25px 10px; text-align: center; color: var(--muted); font-size:
 @media (prefers-reduced-motion: reduce) {
   .card-inner { transition: none; }
   .table.shuffling .card-button { animation: none; }
+  .preview[open], .preview::backdrop { animation: none; }
 }
