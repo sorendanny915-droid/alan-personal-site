@@ -1,0 +1,180 @@
+:root {
+  color-scheme: light;
+  color: #282e27;
+  background: #f7f3e9;
+  font: 16px/1.6 "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --serif: "Songti SC", "Noto Serif CJK SC", SimSun, serif;
+  --muted: #5c655b;
+  --red: #9e3225;
+  --line: #dfd4bf;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: #315d4b; text-underline-offset: 4px; }
+:focus-visible { outline: 2px solid #315d4b; outline-offset: 4px; }
+
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px max(5vw, calc((100vw - 1120px) / 2));
+  background: #fffdf7;
+  font-size: .875rem;
+}
+
+.site-header a { font-weight: 700; text-decoration: none; }
+.site-header span { color: var(--muted); }
+
+.hero {
+  display: grid;
+  align-items: center;
+  min-height: clamp(320px, 36vw, 520px);
+  padding: 32px 5vw;
+  background: linear-gradient(90deg, #fff7e8f5 0%, #fff7e8d9 19%, #fff7e82b 48%, transparent 64%),
+    #dfd4bf url("assets/temple-sunrise.jpg") center 48% / cover no-repeat;
+}
+
+.hero-copy { width: min(100%, 1120px); margin-inline: auto; }
+h1, h2 { font-family: var(--serif); }
+h1 {
+  margin: 0 0 10px;
+  font-size: clamp(3rem, 7.5vw, 6rem);
+  line-height: 1.1;
+  letter-spacing: .09em;
+  color: #263a2f;
+}
+
+time { color: #414d42; font-weight: 600; }
+
+.layout {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  gap: 20px;
+  width: min(90vw, 1120px);
+  margin: -28px auto 0;
+}
+
+.draw, .paper {
+  min-width: 0;
+  min-height: 242px;
+  padding: clamp(20px, 3vw, 34px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fffdf7;
+  box-shadow: 0 12px 32px #3b2c1310;
+}
+
+.draw {
+  display: grid;
+  grid-template-columns: minmax(94px, .8fr) 1.2fr;
+  align-items: center;
+  gap: clamp(12px, 2vw, 24px);
+}
+
+h2 { margin: 0; font-size: 1.6rem; }
+.draw p, .placeholder { margin: 6px 0 16px; color: var(--muted); }
+
+.stage {
+  display: grid;
+  height: 174px;
+  place-items: end center;
+  padding-bottom: 12px;
+  background: radial-gradient(ellipse 46% 10% at 50% 94%, #774a3030, transparent);
+}
+
+.tube { position: relative; width: 82px; height: 111px; transform-origin: center bottom; }
+.tube.shake { animation: shake .85s ease-in-out; }
+@keyframes shake {
+  15%, 45%, 70% { transform: translateY(-9px) rotate(-12deg); }
+  30%, 60%, 85% { transform: translateY(-3px) rotate(11deg); }
+}
+
+.stick {
+  position: absolute;
+  bottom: 56px;
+  left: var(--x);
+  width: 10px;
+  height: 66px;
+  border-radius: 3px;
+  background: linear-gradient(#a2382d 17px, transparent 17px),
+    linear-gradient(90deg, #ba8c4f, #f0c984 55%, #b47a42);
+  transform: translateY(calc(-1 * var(--rise))) rotate(var(--angle));
+  transform-origin: center bottom;
+  transition: transform .3s ease-out;
+}
+
+.tube.drawn .drawn-stick { transform: translateY(-56px) rotate(9deg); }
+
+.vessel {
+  position: absolute;
+  inset: 13px 0 0;
+  display: grid;
+  place-items: center;
+  border: 2px solid #713524;
+  border-top: 5px solid #bd8351;
+  border-radius: 17% 17% 26% 26% / 9% 9% 14% 14%;
+  background: repeating-linear-gradient(90deg, transparent 0 7px, #421f171c 8px 9px),
+    linear-gradient(90deg, #6c301f, #a75632 42%, #75351e);
+  box-shadow: inset 0 -8px #54251870;
+}
+
+.vessel span {
+  display: grid;
+  place-items: center;
+  width: 37px;
+  height: 42px;
+  border: 1px solid #dfb778;
+  border-radius: 45% 45% 42% 42%;
+  color: #ffe6ad;
+  font: 700 1.35rem var(--serif);
+}
+
+.go {
+  min-height: 46px;
+  padding: 8px 22px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--red);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.go:hover { background: #82291f; }
+.go:disabled { opacity: .7; cursor: progress; }
+.paper { background: linear-gradient(145deg, #fffdf6, #fff6e6); }
+.result-heading { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.result-heading p { margin: 0; }
+#no { color: #6f5841; font-size: .875rem; }
+#lv { padding: 2px 9px; border: 1px solid #c87965; border-radius: 4px; color: #892e24; font-weight: 700; }
+.poem { margin: 14px 0; color: #443425; font: 700 1.33rem/1.75 var(--serif); white-space: pre-line; }
+dl { display: grid; gap: 8px; margin: 0; padding-top: 12px; border-top: 1px solid var(--line); }
+dl div { display: grid; grid-template-columns: 3em 1fr; gap: 8px; }
+dt { color: #74402b; font-weight: 700; }
+dd { margin: 0; }
+footer { padding: 26px 5vw; text-align: center; color: var(--muted); font-size: .875rem; }
+
+@media (max-width: 680px) {
+  .hero {
+    align-items: end;
+    min-height: clamp(276px, 72vw, 425px);
+    padding-bottom: 38px;
+    background-image: linear-gradient(0deg, #fff7e8 0%, #fff7e8e0 23%, #fff7e866 38%, transparent 56%),
+      url("assets/temple-sunrise.jpg");
+    background-position: 70% center;
+  }
+  h1 { margin-bottom: 2px; }
+  .layout { grid-template-columns: 1fr; gap: 14px; margin-top: -16px; }
+  .draw, .paper { min-height: 0; }
+  .stage { height: 145px; padding: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tube.shake { animation: none; }
+  .stick { transition: none; }
+}

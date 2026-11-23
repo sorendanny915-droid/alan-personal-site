@@ -1,0 +1,115 @@
+.support-launch {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 1;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid #c5dbe2;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 4px 16px #12263a18;
+  color: #24596a;
+  font: inherit;
+  font-size: .8125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.support-launch span { margin-right: 2px; font-size: 1rem; }
+.support-launch:hover { background: #edf8fb; }
+footer { margin-bottom: 40px; }
+
+.support-dialog {
+  width: min(440px, calc(100% - 28px));
+  max-height: calc(100% - 28px);
+  padding: clamp(16px, 4vw, 24px);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 20px 64px #12263a30;
+  color: var(--ink);
+}
+
+.support-dialog::backdrop { background: #12263a68; }
+.support-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.support-header h2 { margin: 0; font-size: 1.25rem; }
+.support-close {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #eef3f7;
+  color: #244356;
+  font: inherit;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.support-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+  margin: 8px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.support-options legend { margin-bottom: 8px; color: var(--mute); font-size: .875rem; }
+.support-options label { position: relative; }
+.support-options input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.support-options label > span {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 7px;
+  padding: 8px 9px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: .875rem;
+  cursor: pointer;
+}
+
+.support-options i { grid-row: span 2; font-style: normal; font-size: 1.3rem; }
+.support-options b { grid-column: 2; color: #24596a; }
+.support-options input:checked + span { border-color: #217387; background: #edf8fb; box-shadow: inset 0 0 0 1px #217387; }
+.support-options input:focus-visible + span { outline: 2px solid #217387; outline-offset: 2px; }
+.support-instruction { margin: 14px 0 6px; text-align: center; font-size: .875rem; }
+
+.support-qr {
+  width: min(220px, 100%);
+  margin: 0 auto;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+
+/* Enlarge the square code from the original WeChat poster. */
+.support-qr-frame { position: relative; overflow: hidden; aspect-ratio: 1; }
+.support-qr-frame img {
+  position: absolute;
+  top: -65%;
+  left: -44.118%;
+  display: block;
+  width: 188.235%;
+  height: auto;
+}
+
+.support-save {
+  display: block;
+  margin-top: 10px;
+  color: #24596a;
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: .8125rem;
+}

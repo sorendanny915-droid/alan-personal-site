@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Alan的魔术箱</title>
 <meta name="description" content="自己做、自己用的小工具合集。点开就能用。">
+<link rel="stylesheet" href="support.css">
 <style>
 :root{--teal:#0e8aa0;--violet:#6a5be0;--ink:#12263a;--mute:#5b6b7b;--line:#e1e8ef;
  font:16px/1.6 "PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;color:var(--ink)}
@@ -55,8 +56,8 @@ footer{text-align:center;font-size:13px;color:var(--mute);padding:36px 0 20px}
   <div class="grid" id="grid">
     <a class="card live" href="fortune.html" data-c="娱乐">
       <div class="top"><span class="ico">🏮</span><span class="badge">● 已上线</span></div>
-      <h3>赛博求签 3D</h3><p>3D 签筒摇一摇，每天求一支签，附解签与宜忌。</p>
-      <div class="tags"><span>娱乐</span><span>3D</span></div><span class="open">打开 →</span>
+      <h3>赛博求签</h3><p>走进晴日山间道观，摇一支签，查看今日签文和解签。</p>
+      <div class="tags"><span>娱乐</span><span>每日一签</span></div><span class="open">打开 →</span>
     </a>
     <a class="card live" href="play-mmr.html" data-c="娱乐">
       <div class="top"><span class="ico">🎮</span><span class="badge">● 已上线</span></div>
@@ -72,6 +73,29 @@ footer{text-align:center;font-size:13px;color:var(--mute);padding:36px 0 20px}
   <p class="empty" id="empty">没有找到匹配的工具。</p>
   <footer>© <script>document.write(new Date().getFullYear())</script> Alan的魔术箱 · 持续更新中</footer>
 </div>
+<button class="support-launch" id="support-launch" type="button" aria-haspopup="dialog" aria-controls="support">
+  <span aria-hidden="true">♡</span> 请 Alan 吃点东西
+</button>
+<dialog class="support-dialog" id="support" aria-labelledby="support-title">
+  <div class="support-header">
+    <h2 id="support-title">请 Alan 吃点东西</h2>
+    <form method="dialog"><button class="support-close" type="submit" aria-label="关闭" autofocus>×</button></form>
+  </div>
+  <fieldset class="support-options">
+    <legend>选一份小心意</legend>
+    <label><input type="radio" name="support-item" value="1.6" checked><span><i aria-hidden="true">💧</i> 矿泉水 <b>¥1.6</b></span></label>
+    <label><input type="radio" name="support-item" value="6.6"><span><i aria-hidden="true">🍋</i> 柠檬水 <b>¥6.6</b></span></label>
+    <label><input type="radio" name="support-item" value="16"><span><i aria-hidden="true">🍱</i> 拼好饭 <b>¥16</b></span></label>
+    <label><input type="radio" name="support-item" value="26"><span><i aria-hidden="true">🍔</i> 汉堡套餐 <b>¥26</b></span></label>
+  </fieldset>
+  <p class="support-instruction" role="status">微信扫码，手动输入 <strong id="support-amount">¥1.6</strong></p>
+  <figure class="support-qr">
+    <div class="support-qr-frame">
+      <img alt="Alan 的微信收款二维码" width="1280" height="1770" data-src="assets/wechat-support.jpg">
+    </div>
+  </figure>
+  <a class="support-save" href="assets/wechat-support.jpg" download="Alan-微信收款码.jpg">保存收款码，在微信中识别</a>
+</dialog>
 <script>
 const q=document.getElementById('q'),cards=[...document.querySelectorAll('.card')],chips=[...document.querySelectorAll('.chip')];
 let cat='all';
@@ -80,6 +104,16 @@ function apply(){const t=q.value.trim().toLowerCase();let n=0;
  document.getElementById('empty').style.display=n?'none':'block'}
 q.addEventListener('input',apply);
 chips.forEach(b=>b.addEventListener('click',()=>{cat=b.dataset.c;chips.forEach(x=>x.setAttribute('aria-pressed',x===b));apply()}));
+
+const supportDialog = document.getElementById('support');
+const supportImage = supportDialog.querySelector('img');
+document.getElementById('support-launch').addEventListener('click', () => {
+  if (!supportImage.hasAttribute('src')) supportImage.src = supportImage.dataset.src;
+  supportDialog.showModal();
+});
+supportDialog.querySelector('.support-options').addEventListener('change', event => {
+  document.getElementById('support-amount').textContent = '¥' + event.target.value;
+});
 </script>
 </body>
 </html>
