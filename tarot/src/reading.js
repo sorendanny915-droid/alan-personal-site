@@ -26,18 +26,34 @@ const preview = document.getElementById('preview');
 const previewArt = document.getElementById('preview-art');
 const previewLoading = document.getElementById('preview-loading');
 const previewOrientation = document.getElementById('preview-orientation');
+const previewMedia = previewArt.parentElement;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const preparedArt = new Map();
 let mode = 'spread';
 let deck = [];
 let drawn = [];
 let busy = false;
+let previewRequest = 0;
+let restoreArtwork = null;
 
 function artPath(card) {
-  return './cards/' + String(card.id).padStart(2, '0') + '.jpg';
+  return './cards/' + String(card.id).padStart(2, '0') + '.webp';
 }
 
 function wait(milliseconds) {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
+async function prepareArtwork(card) {
+  const image = new Image(640, 960);
+  image.alt = '';
+  image.src = artPath(card);
+  try {
+    await image.decode();
+    preparedArt.set(card.id, image);
+  } catch {
+    // Leave the card name and reading available if its artwork cannot load.
+  }
 }
 
 function renderSlots() {
@@ -49,7 +65,6 @@ function renderSlots() {
           <span class="card-back" aria-hidden="true"><span class="medallion">⚙</span></span>
           <span class="card-front" aria-hidden="true">
             <span class="front-label"></span>
-            <img alt="" width="640" height="960" hidden>
           </span>
         </span>
       </button>
@@ -78,6 +93,7 @@ function updateControls() {
 function resetReading() {
   deck = [];
   drawn = [];
+  preparedArt.clear();
   table.dataset.mode = mode;
   document.getElementById('mode-description').textContent = mode === 'spread'
     ? '根源 · 当下 · 指引'
@@ -102,12 +118,14 @@ async function shuffle() {
     const other = Math.floor(Math.random() * (index + 1));
     [deck[index], deck[other]] = [deck[other], deck[index]];
   }
-  status.textContent = '正在洗牌…';
+  status.textContent = '正在洗牌并准备牌面…';
+  const artworkReady = Promise.all(deck.slice(-positions[mode].length).map(prepareArtwork));
   if (!reducedMotion.matches) {
     table.classList.add('shuffling');
     await wait(440);
     table.classList.remove('shuffling');
   }
+  await artworkReady;
   busy = false;
   status.textContent = mode === 'spread' ? '已洗牌，先翻开「根源」。' : '已洗牌，可以抽牌了。';
   updateControls();
@@ -156,7 +174,7 @@ function showSummary() {
   summary.hidden = false;
 }
 
-async function draw() {
+function draw() {
   const index = drawn.length;
   const position = positions[mode][index];
   if (busy || !deck.length || !position) return;
@@ -164,16 +182,14 @@ async function draw() {
   const card = deck.pop();
   const entry = { card, reversed: Math.random() < 0.5 };
 
-  busy = true;
-  updateControls();
-  status.textContent = `正在翻开「${position.name}」…`;
-  const artwork = button.querySelector('img');
-  artwork.classList.toggle('upside-down', entry.reversed);
-  artwork.addEventListener('load', () => { artwork.hidden = false; }, { once: true });
-  artwork.src = artPath(card);
+  const artwork = preparedArt.get(card.id);
+  if (artwork) {
+    artwork.classList.toggle('upside-down', entry.reversed);
+    button.querySelector('.card-front').append(artwork);
+    preparedArt.delete(card.id);
+  }
   button.querySelector('.front-label').textContent = card.zh;
   button.classList.add('revealed');
-  if (!reducedMotion.matches) await wait(460);
 
   drawn.push(entry);
   spread.querySelector(`[data-caption="${index}"]`).textContent = `${card.zh} · ${orientation(entry)}`;
@@ -182,7 +198,6 @@ async function draw() {
   zoomTip.hidden = false;
   appendInterpretation(entry, position);
 
-  busy = false;
   const next = positions[mode][drawn.length];
   if (next) {
     status.textContent = `「${position.name}」已翻开，下一张是「${next.name}」。`;
@@ -209,7 +224,7 @@ spread.addEventListener('click', event => {
   if (!button || button.disabled) return;
   const entry = drawn[Number(button.dataset.slot)];
   if (entry) {
-    openPreview(entry.card, entry.reversed);
+    openPreview(entry.card, entry.reversed, button.querySelector('img'));
   } else {
     draw();
   }
@@ -219,7 +234,30 @@ resetReading();
 const library = document.getElementById('library');
 const libraryGrid = document.getElementById('library-grid');
 
-function openPreview(card, reversed = null) {
+function openPreview(card, reversed = null, artwork = null) {
+  const request = ++previewRequest;
+  if (artwork) {
+    const slot = artwork.parentElement;
+    previewArt.hidden = true;
+    previewLoading.hidden = true;
+    artwork.alt = card.zh + '牌面';
+    previewMedia.append(artwork);
+    restoreArtwork = () => {
+      artwork.alt = '';
+      slot.append(artwork);
+    };
+  } else {
+    loadPreviewArtwork(card, reversed, request);
+  }
+  previewOrientation.hidden = reversed === null;
+  previewOrientation.textContent = reversed === null ? '' : orientation({ reversed });
+  previewOrientation.classList.toggle('reversed', reversed === true);
+  document.getElementById('preview-title').textContent = card.zh;
+  document.getElementById('preview-essence').textContent = card.essence;
+  preview.showModal();
+}
+
+function loadPreviewArtwork(card, reversed, request) {
   const source = new URL(artPath(card), document.baseURI).href;
   if (previewArt.src !== source || previewArt.hidden) {
     previewArt.hidden = true;
@@ -229,25 +267,23 @@ function openPreview(card, reversed = null) {
       previewArt.src = source;
     }
     previewArt.decode().then(() => {
-      if (previewArt.src !== source) return;
+      if (request !== previewRequest) return;
       previewLoading.hidden = true;
       previewArt.hidden = false;
     }).catch(() => {
-      if (previewArt.src === source && previewArt.hidden) {
+      if (request === previewRequest) {
         previewLoading.textContent = '牌面加载失败，请关闭后重试。';
       }
     });
   }
   previewArt.alt = card.zh + '牌面';
   previewArt.classList.toggle('upside-down', reversed === true);
-  previewOrientation.hidden = reversed === null;
-  previewOrientation.textContent = reversed === null ? '' : orientation({ reversed });
-  previewOrientation.classList.toggle('reversed', reversed === true);
-  document.getElementById('preview-title').textContent = card.zh;
-  document.getElementById('preview-essence').textContent = card.essence;
-  preview.showModal();
 }
 
+preview.addEventListener('close', () => {
+  restoreArtwork?.();
+  restoreArtwork = null;
+});
 preview.addEventListener('click', event => {
   if (event.target !== preview) return;
   const bounds = preview.getBoundingClientRect();

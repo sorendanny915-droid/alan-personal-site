@@ -146,7 +146,7 @@ h1, h2, h3, h4 { font-family: var(--serif); line-height: 1.25; margin: 0; }
   35% { transform: translate(-5px, -5px) rotate(-4deg); }
   70% { transform: translate(5px, -3px) rotate(4deg); }
 }
-.card-inner { display: block; position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .46s ease; }
+.card-inner { display: block; position: relative; width: 100%; height: 100%; transform-style: preserve-3d; }
 .card-button.revealed .card-inner { transform: rotateY(180deg); }
 .card-back, .card-front {
   position: absolute;
@@ -224,15 +224,11 @@ h1, h2, h3, h4 { font-family: var(--serif); line-height: 1.25; margin: 0; }
 .library-card img { display: block; width: 100%; height: auto; border-radius: 4px; }
 .library-card span { font-size: .8rem; }
 .preview { width: min(92vw, 520px); max-height: 92vh; padding: 14px 16px; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
-.preview[open] { animation: preview-zoom .26s cubic-bezier(.2, .8, .25, 1) both; }
-.preview::backdrop { background: #0e0906ce; animation: backdrop-fade .22s ease-out both; }
+.preview[open] { animation: preview-zoom .16s cubic-bezier(.2, .8, .25, 1) both; }
+.preview::backdrop { background: #0e0906ce; }
 @keyframes preview-zoom {
-  from { opacity: 0; transform: translateY(14px) scale(.84); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes backdrop-fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { transform: scale(.94); }
+  to { transform: scale(1); }
 }
 .preview form { display: flex; justify-content: flex-end; margin-bottom: 8px; }
 .preview-media {
@@ -264,7 +260,6 @@ footer { padding: 25px 10px; text-align: center; color: var(--muted); font-size:
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card-inner { transition: none; }
   .table.shuffling .card-button { animation: none; }
-  .preview[open], .preview::backdrop { animation: none; }
+  .preview[open] { animation: none; }
 }
